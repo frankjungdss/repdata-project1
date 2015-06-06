@@ -70,18 +70,11 @@ if (!file.exists("activity.csv")) {
     # unpack archive
     unzip(zipFileName, overwrite = FALSE)
     print(paste(Sys.time(), "archive unpacked"))
-    rm(zipFileName)
 }
 
 # load into data frame and convert date column to date
 data <- read.csv("activity.csv", stringsAsFactors = FALSE)
-# make new column datetime using date and 5 minute intervals
-data <- transform(data, 
-                  datetime = strptime(
-                                paste(date, formatC(interval, flag = "0", width = 4)), 
-                                format = "%Y-%m-%d %H%M"), 
-                  date = as.Date(data$date, "%Y-%m-%d")
-                  )
+data <- transform(data, date = as.Date(data$date, "%Y-%m-%d"))
 ```
 
 ## What is mean total number of steps taken per day?
@@ -94,14 +87,14 @@ no data was recorded.
 Aggregate the total number of steps per day:
 ```{r daily}
 dailyTotals <- aggregate(steps ~ date, data, FUN = sum)
+stepsMean <- mean(dailyTotals$steps)
+stepsMedian <- median(dailyTotals$steps)
 ```
 
-The mean number of steps was 
-**`r prettyNum(round(mean(dailyTotals$steps)), big.mark=",")`** per day. 
-_(Rounded up from **`r prettyNum(mean(dailyTotals$steps), big.mark=",")`**
-as fractional steps do not make sense.)_  
-The median number of steps was 
-**`r prettyNum(median(dailyTotals$steps), big.mark=",")`** per day. 
+The mean number of steps was **`r prettyNum(round(stepsMean), big.mark=",")`** per
+day. _(Rounded up from **`r prettyNum(stepsMean, big.mark=",")`** as fractional steps 
+do not make sense.)_  
+The median number of steps was **`r prettyNum(stepsMedian, big.mark=",")`** per day. 
 
 Below is a plot showing the total number of steps per day as a histogram:
 ```{r histogram}
@@ -124,11 +117,12 @@ Average the number of steps taken across all days:
 
 ```{r intervals}
 intervalTotals <- aggregate(steps ~ interval, data, FUN = mean)
+maxSteps <- subset(intervalTotals, subset = steps == max(steps), select = "interval")
 ```
 
 The 5-minute interval which on average across all the days in the dataset
 contains the maximum number of steps is
-**`r subset(intervalTotals, subset = steps == max(steps), select = "interval")`**.
+**`r maxSteps`**.
 This peak is shown in the time series (line) plot of the 5-minute intervals and
 the number of steps taken averaged across all days:
 
@@ -138,7 +132,7 @@ require(ggplot2, quietly = TRUE)
 require(scales, quietly = TRUE)
 intervalTotals %>%
     ggplot(aes(interval, steps)) + 
-    geom_line(color = "purple") +
+    geom_line(colour = "purple") +
     theme_light(base_family = "Avenir", base_size = 11) +
     scale_x_discrete(breaks = pretty_breaks(15)) +
     scale_y_continuous(breaks = pretty_breaks(10)) +
@@ -155,9 +149,9 @@ values (coded as `NA`). The presence of missing days may introduce
 bias into some calculations or summaries of the data.
 
 There is missing steps data represented by rows with steps value of `NA`.
-There are **```r nrow(data[is.na(data$steps),])```** of **```r nrow(data)```**
+There are **`r nrow(data[is.na(data$steps),])`** of **`r nrow(data)`**
 rows without step values. That is, around
-**```r round(nrow(data[is.na(data$steps),])/nrow(data) * 100)```**% of 
+**`r round(nrow(data[is.na(data$steps),])/nrow(data) * 100)`**% of 
 step data is missing.
 
 We will impute missing steps using the _median_ for that _weekdays_ 5-minute 
@@ -191,15 +185,14 @@ number of steps taken per day, and then show in a histogram.
 
 ```{r dailyimputed}
 dailyImputedTotals <- aggregate(steps ~ date, imputedData, FUN = sum)
+stepsMean <- mean(dailyImputedTotals$steps)
+stepsMedian <- median(dailyImputedTotals$steps)
 ```
 
-The mean number of steps was 
-**`r prettyNum(round(mean(dailyImputedTotals$steps)), big.mark=",")`**
-per day. _(Rounded up from 
-**`r prettyNum(mean(dailyImputedTotals$steps), big.mark=",")`** as fractional 
+The mean number of steps was **`r prettyNum(round(stepsMean), big.mark=",")`**
+per day. _(Rounded up from **`r prettyNum(stepsMean, big.mark=",")`** as fractional 
 steps do not make sense.)_  
-The median number of steps was 
-**`r prettyNum(median(dailyImputedTotals$steps), big.mark=",")`** per day. 
+The median number of steps was **`r prettyNum(stepsMedian, big.mark=",")`** per day. 
 
 Notice that imputed data shows an increase in frequency of lesser steps. This 
 has the side-effect of reducing the mean step count per day, while essentially 
@@ -231,7 +224,6 @@ require(dplyr, quietly = TRUE)
 imputedWeekDayData <- imputedData %>%
     mutate(weekday = factor(ifelse(format(date, "%u") < 6, "weekday", "weekend"))) %>%
     select(weekday, interval, steps) %>%
-    # arrange(weekday, interval) %>%
     group_by(weekday, interval) %>%
     summarise(average = mean(steps))
 ```
@@ -244,7 +236,7 @@ require(ggplot2, quietly = TRUE)
 require(scales, quietly = TRUE)
 imputedWeekDayData %>%
     ggplot(aes(x = interval, y = average)) + 
-    geom_line(color = "purple") +
+    geom_line(colour = "purple") +
     theme_light(base_family = "Avenir", base_size = 11) +
     scale_x_discrete(breaks = pretty_breaks(15)) +
     scale_y_continuous(breaks = pretty_breaks(10)) +
@@ -255,5 +247,5 @@ imputedWeekDayData %>%
 ```
 
 The weekday step average is higher in the morning, possibly indicating that the
-individual was active earlier during a weekday. Did they enjoy a sleep-in on
-weekends?
+individual was active earlier during a weekday. Also, on weekends, there appears
+to be more activity throughout the day.
