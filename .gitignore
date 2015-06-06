@@ -1,7 +1,8 @@
-.Rproj.user
-.Rhistory
+activity.csv
+*_cache
+*_files
+project1*.*
 .RData
 README.html
-README_cache
-README_files
-activity.csv
+.Rhistory
+.Rproj.user
