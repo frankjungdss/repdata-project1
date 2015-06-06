@@ -16,7 +16,7 @@ Manifest
 * [PA1_template.md](PA1_template.md) - generated markdown
 * [PA1_template.Rmd](PA1_template.Rmd) - source markdown
 * [PA1_template.html](PA1_template.html) - generated HTML
-* [figures/](figures/) - directory containing generated figures
+* [figure/](figure/) - directory containing generated figures
 
 Build Environment
 -----------------
