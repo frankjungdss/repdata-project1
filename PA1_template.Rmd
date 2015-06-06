@@ -48,7 +48,7 @@ For convience the raw dataset is included in this repository.
 
 ## Loading and preprocessing the data
 
-Ensure that we show all our working:
+Ensure that we show all our working and set global defaults:
 ```{r setoptions, echo=TRUE}
 require(knitr, quietly = TRUE)
 opts_chunk$set(echo = TRUE, cache = TRUE, fig.width = 10)
@@ -155,13 +155,14 @@ values (coded as `NA`). The presence of missing days may introduce
 bias into some calculations or summaries of the data.
 
 There is missing steps data represented by rows with steps value of `NA`.
-There are **```r nrow(data[is.na(data$steps),])``` ** of **```r nrow(data)``` **
+There are **```r nrow(data[is.na(data$steps),])```** of **```r nrow(data)```**
 rows without step values. That is, around
-**```r round(nrow(data[is.na(data$steps),])/nrow(data) * 100)```% ** of 
+**```r round(nrow(data[is.na(data$steps),])/nrow(data) * 100)```**% of 
 step data is missing.
 
-We will impute this missing steps data using the _median_ for that _weekdays_ 
-5-minute interval. That is modelling using similar activity by day of week.
+We will impute missing steps using the _median_ for that _weekdays_ 5-minute 
+interval. That is, modelling against similar activity by day of week. Firstly,
+calculate the median by weekday:
 ```{r getmedian}
 require(dplyr, quietly = TRUE)
 intervalsByDay <- data %>%
@@ -171,7 +172,7 @@ intervalsByDay <- data %>%
     summarise(median = as.integer(median(steps, na.rm = TRUE)))
 ```
 
-Using these day / interval medians we can now impute the missing steps data.
+Now, using these day/interval medians impute the missing steps data:
 ```{r imputesteps}
 require(dplyr, quietly = TRUE)
 imputedData <- data %>%
@@ -184,8 +185,9 @@ imputedData <- imputedData %>%
     mutate(steps = ifelse(is.na(steps), median, steps)) %>%
     select(date, interval, steps)
 ```
-Further analysis will be down on the results of this imputed data set. Firstly,
-summarise the total number of steps per day, which we will show in a histogram.
+
+Further analysis will use these imputed results. Firstly, summarise the total 
+number of steps taken per day, and then show in a histogram.
 
 ```{r dailyimputed}
 dailyImputedTotals <- aggregate(steps ~ date, imputedData, FUN = sum)
