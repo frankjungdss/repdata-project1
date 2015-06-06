@@ -48,13 +48,15 @@ For convience the raw dataset is included in this repository.
 ## Loading and preprocessing the data
 
 Ensure that we show all our working:
-```{r setoptions, echo=TRUE}
+
+```r
 require(knitr, quietly = TRUE)
 opts_chunk$set(echo = TRUE, cache = TRUE)
 ```
 
 Load data into a data frame:
-```{r loaddata}
+
+```r
 require(utils, quietly = TRUE)
 
 # unzip overwriting existing directory to ensure clean setup
@@ -86,24 +88,26 @@ data <- transform(data,
 ## What is mean total number of steps taken per day?
 
 The following histogram shows the total number of steps taken each day during 
-the two month period from **`r format(min(data$date), "%a %b %d, %Y")`**
-to **`r format(max(data$date), "%a %b %d, %Y")`**. This ignores days for which 
+the two month period from **Mon Oct 01, 2012**
+to **Fri Nov 30, 2012**. This ignores days for which 
 no data was recorded.
 
 Aggregate the total number of steps per day:
-```{r daily}
+
+```r
 dailyTotals <- aggregate(steps ~ date, data, FUN = sum)
 ```
 
 The mean number of steps was 
-**`r prettyNum(round(mean(dailyTotals$steps)), big.mark=",")`** per day. 
-_(Rounded up from **`r prettyNum(mean(dailyTotals$steps), big.mark=",")`**
+**10,766** per day. 
+_(Rounded up from **10,766.19**
 as fractional steps do not make sense.)_  
 The median number of steps was 
-**`r prettyNum(median(dailyTotals$steps), big.mark=",")`** per day. 
+**10,765** per day. 
 
 Below is a plot showing the total number of steps per day as a histogram:
-```{r histogram}
+
+```r
 require(magrittr, quietly = TRUE)
 require(ggplot2, quietly = TRUE)
 require(scales, quietly = TRUE)
@@ -117,21 +121,25 @@ dailyTotals %>%
     ggtitle("Histogram: total steps per day")
 ```
 
+![plot of chunk histogram](figure/histogram-1.png) 
+
 ## What is the average daily activity pattern?
 
 Average the number of steps taken across all days:
 
-```{r intervals}
+
+```r
 intervalTotals <- aggregate(steps ~ interval, data, FUN = mean)
 ```
 
 The 5-minute interval which on average across all the days in the dataset
 contains the maximum number of steps is
-**`r subset(intervalTotals, subset = steps == max(steps), select = "interval")`**.
+**835**.
 This peak is shown in the time series (line) plot of the 5-minute intervals and
 the number of steps taken averaged across all days:
 
-```{r timeseries}
+
+```r
 require(magrittr, quietly = TRUE)
 require(ggplot2, quietly = TRUE)
 require(scales, quietly = TRUE)
@@ -147,6 +155,8 @@ intervalTotals %>%
     ggtitle("Time Series: steps per 5-minute interval")
 ```
 
+![plot of chunk timeseries](figure/timeseries-1.png) 
+
 ## Imputing missing values
 
 Note that there are a number of days/intervals where there are missing
@@ -154,15 +164,32 @@ values (coded as `NA`). The presence of missing days may introduce
 bias into some calculations or summaries of the data.
 
 There is missing steps data represented by rows with steps value of `NA`.
-There are **```r nrow(data[is.na(data$steps),])``` ** of **```r nrow(data)``` **
+There are **``2304`` ** of **``17568`` **
 rows without step values. That is, around
-**```r round(nrow(data[is.na(data$steps),])/nrow(data) * 100)```% ** of 
+**``13``% ** of 
 step data is missing.
 
 We will impute this missing steps data using the _median_ for that _weekdays_ 
 5-minute interval. That is modelling using similar activity by day of week.
-```{r getmedian}
+
+```r
 require(dplyr, quietly = TRUE)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+## 
+## The following object is masked from 'package:stats':
+## 
+##     filter
+## 
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 intervalsByDay <- data %>%
     mutate(dayint = paste0(format(as.Date(date), "%a"), formatC(interval, flag = "0", width = 4))) %>%
     select(dayint, steps) %>%
@@ -171,7 +198,8 @@ intervalsByDay <- data %>%
 ```
 
 Using these day / interval medians we can now impute the missing steps data.
-```{r imputesteps}
+
+```r
 require(dplyr, quietly = TRUE)
 imputedData <- data %>%
     mutate(dayint = paste0(format(as.Date(date), "%a"), formatC(interval, flag = "0", width = 4))) %>%
@@ -186,23 +214,25 @@ imputedData <- imputedData %>%
 Further analysis will be down on the results of this imputed data set. Firstly,
 summarise the total number of steps per day, which we will show in a histogram.
 
-```{r dailyimputed}
+
+```r
 dailyImputedTotals <- aggregate(steps ~ date, imputedData, FUN = sum)
 ```
 
 The mean number of steps was 
-**`r prettyNum(round(mean(dailyImputedTotals$steps)), big.mark=",")`**
+**9,705**
 per day. _(Rounded up from 
-**`r prettyNum(mean(dailyImputedTotals$steps), big.mark=",")`** as fractional 
+**9,704.656** as fractional 
 steps do not make sense.)_  
 The median number of steps was 
-**`r prettyNum(median(dailyImputedTotals$steps), big.mark=",")`** per day. 
+**10,395** per day. 
 
 Notice that imputed data shows an increase in frequency of lesser steps. This 
 has the side-effect of reducing the mean step count per day, while essentially 
 leaving the median step count unchanged.
 
-```{r histogramimputed}
+
+```r
 require(magrittr, quietly = TRUE)
 require(ggplot2, quietly = TRUE)
 require(scales, quietly = TRUE)
@@ -216,11 +246,14 @@ dailyImputedTotals %>%
     ggtitle("Histogram: total imputed steps per day")
 ```
 
+![plot of chunk histogramimputed](figure/histogramimputed-1.png) 
+
 ## Are there differences in activity patterns between weekdays and weekends?
 
 Using imputed data, we will now compare weekday activity to weekends.
 
-```{r imputedweekdays}
+
+```r
 require(dplyr, quietly = TRUE)
 ## create a factor for weekday / weekend
 ## format %u gives weekday as a decimal number (1–7, Monday is 1)
@@ -235,7 +268,8 @@ imputedWeekDayData <- imputedData %>%
 
 The following time series plot shows the 5-minute interval by weekday/weekend:
 
-```{r timeseriesimputed}
+
+```r
 require(magrittr, quietly = TRUE)
 require(ggplot2, quietly = TRUE)
 require(scales, quietly = TRUE)
@@ -250,6 +284,8 @@ imputedWeekDayData %>%
     facet_grid(weekday ~ .) +
     ggtitle("Time Series: averaged steps in 5 minute intervals by weekday/weekend")
 ```
+
+![plot of chunk timeseriesimputed](figure/timeseriesimputed-1.png) 
 
 The weekday step average is higher in the morning, possibly indicating that the
 individual was active earlier during a weekday. Did they enjoy a sleep-in on

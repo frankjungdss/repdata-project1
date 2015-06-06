@@ -1,6 +1,6 @@
 activity.csv
-*_cache
-*_files
+*cache
+*files
 project1*.*
 .RData
 README.html
