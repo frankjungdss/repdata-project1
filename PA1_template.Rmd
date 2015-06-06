@@ -223,7 +223,7 @@ require(dplyr, quietly = TRUE)
 ## format %u gives weekday as a decimal number (1–7, Monday is 1)
 ## so weekdays are when %u < 6, weekends when %u = 6 or 7
 imputedWeekDayData <- imputedData %>%
-    mutate(weekday = factor(ifelse(format(date, "%u") < 6, "weekday", "weekend"))) %>%
+    mutate(weekday = factor(ifelse(format(date, "%u") < 6, "WeekDay", "WeekEnd"))) %>%
     select(weekday, interval, steps) %>%
     group_by(weekday, interval) %>%
     summarise(average = mean(steps))
