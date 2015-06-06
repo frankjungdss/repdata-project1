@@ -370,11 +370,12 @@ intervalsByDay &lt;- data %&gt;%
 
 <pre><code class="r">require(dplyr, quietly = TRUE)
 imputedData &lt;- data %&gt;%
-    mutate(dayint = paste0(format(as.Date(date), &quot;%a&quot;), formatC(interval, flag = &quot;0&quot;, width = 4))) %&gt;%
+    mutate(dayint = paste0(format(as.Date(date), &quot;%a&quot;), 
+                           formatC(interval, flag = &quot;0&quot;, width = 4))) %&gt;%
     select(dayint, date, interval, steps)
-## add median for days interval into data frame
+## merge median for days interval into data frame (this adds a median column)
 imputedData &lt;- merge(imputedData, intervalsByDay)
-## use day interval median into steps where steps is missing
+## where steps is missing use day interval median
 imputedData &lt;- imputedData %&gt;%
     mutate(steps = ifelse(is.na(steps), median, steps)) %&gt;%
     select(date, interval, steps)
