@@ -170,7 +170,8 @@ Now, using these day/interval medians impute the missing steps data:
 ```{r imputesteps}
 require(dplyr, quietly = TRUE)
 imputedData <- data %>%
-    mutate(dayint = paste0(format(as.Date(date), "%a"), formatC(interval, flag = "0", width = 4))) %>%
+    mutate(dayint = paste0(format(as.Date(date), "%a"), 
+                           formatC(interval, flag = "0", width = 4))) %>%
     select(dayint, date, interval, steps)
 ## merge median for days interval into data frame (this adds a median column)
 imputedData <- merge(imputedData, intervalsByDay)
