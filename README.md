@@ -18,8 +18,18 @@ Manifest
 * [PA1_template.html](PA1_template.html) - generated HTML
 * [figure/](figure/) - directory containing generated figures
 
-Build Environment
------------------
+Build
+-----
+
+To build HTML output from `Rmd` use:
+
+```r
+library(knitr)
+knit2html("PA1_template.Rmd")
+```
+
+Environment
+-----------
 
 * RStudio Version 0.99.441 
 * R Version 3.2.0 (2015-04-16)
