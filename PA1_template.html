@@ -256,42 +256,46 @@ opts_chunk$set(echo = TRUE, cache = TRUE, fig.width = 10)
 
 <pre><code class="r">require(utils, quietly = TRUE)
 
-# unzip overwriting existing directory to ensure clean setup
+## unzip overwriting existing directory to ensure clean setup
 if (!file.exists(&quot;activity.csv&quot;)) {
-    # download archive into local directory
+    ## download archive into local directory
     zipFileName &lt;- file.path(&quot;activity.zip&quot;)
     if (!file.exists(zipFileName)) {
         zipUrl &lt;- &quot;https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip&quot;
         download.file(zipUrl, destfile = zipFileName, method = &quot;curl&quot;, mode = &quot;wb&quot;)
         print(paste(Sys.time(), &quot;archive downloaded&quot;))
     }
-    # unpack archive
+    ## unpack archive
     unzip(zipFileName, overwrite = FALSE)
     print(paste(Sys.time(), &quot;archive unpacked&quot;))
 }
 
-# load into data frame and convert date column to date
+## load into data frame and convert date column to date
 data &lt;- read.csv(&quot;activity.csv&quot;, stringsAsFactors = FALSE)
 data &lt;- transform(data, date = as.Date(data$date, &quot;%Y-%m-%d&quot;))
+
+## what period does the data cover?
+fromDate &lt;- format(min(data$date), &quot;%a %b %d, %Y&quot;)
+toDate &lt;- format(max(data$date), &quot;%a %b %d, %Y&quot;)
 </code></pre>
 
 <h2>What is mean total number of steps taken per day?</h2>
 
 <p>The following histogram shows the total number of steps taken each day during 
-the two month period from <strong>Mon Oct 01, 2012</strong>
-to <strong>Fri Nov 30, 2012</strong>. This ignores days for which 
-no data was recorded.</p>
+the two month period<br/>
+from <strong>Mon Oct 01, 2012</strong> to <strong>Fri Nov 30, 2012</strong>.<br/>
+This excludes days for which no steps data was recorded.</p>
 
 <p>Aggregate the total number of steps per day:</p>
 
 <pre><code class="r">dailyTotals &lt;- aggregate(steps ~ date, data, FUN = sum)
-stepsMean &lt;- mean(dailyTotals$steps)
-stepsMedian &lt;- median(dailyTotals$steps)
+
+## calculate mean and median from daily totals
+stepsMean &lt;- prettyNum(mean(dailyTotals$steps), big.mark=&quot;,&quot;)
+stepsMedian &lt;- prettyNum(median(dailyTotals$steps), big.mark=&quot;,&quot;)
 </code></pre>
 
-<p>The mean number of steps was <strong>10,766</strong> per
-day. <em>(Rounded up from <strong>10,766.19</strong> as fractional steps 
-do not make sense.)</em><br/>
+<p>The mean number of steps was <strong>10,766.19</strong> per day.<br/>
 The median number of steps was <strong>10,765</strong> per day. </p>
 
 <p>Below is a plot showing the total number of steps per day as a histogram:</p>
@@ -316,12 +320,13 @@ dailyTotals %&gt;%
 <p>Average the number of steps taken across all days:</p>
 
 <pre><code class="r">intervalTotals &lt;- aggregate(steps ~ interval, data, FUN = mean)
-maxSteps &lt;- subset(intervalTotals, subset = steps == max(steps), select = &quot;interval&quot;)
+
+## what was interval containing the maximum number of steps?
+maxStepsInterval &lt;- intervalTotals[which.max(intervalTotals$steps), &quot;interval&quot;]
 </code></pre>
 
 <p>The 5-minute interval which on average across all the days in the dataset
-contains the maximum number of steps is
-<strong>835</strong>.
+contains the maximum number of steps is <strong>835</strong>.
 This peak is shown in the time series (line) plot of the 5-minute intervals and
 the number of steps taken averaged across all days:</p>
 
@@ -348,18 +353,35 @@ intervalTotals %&gt;%
 values (coded as <code>NA</code>). The presence of missing days may introduce
 bias into some calculations or summaries of the data.</p>
 
+<pre><code class="r">missingSteps &lt;- nrow(data[is.na(data$steps),])
+totalSteps &lt;- nrow(data)
+percentSteps &lt;- round(missingSteps / totalSteps * 100)
+</code></pre>
+
 <p>There is missing steps data represented by rows with steps value of <code>NA</code>.
-There are <strong>2304</strong> of <strong>17568</strong>
-rows without step values. That is, around
-<strong>13</strong>% of 
-step data is missing.</p>
+There are <strong>2304</strong> of <strong>17568</strong> rows without step values. 
+That is, around <strong>13</strong>% of step data is missing.</p>
 
 <p>We will impute missing steps using the <em>median</em> for that <em>weekdays</em> 5-minute 
 interval. That is, modelling against similar activity by day of week. Firstly,
 calculate the median by weekday:</p>
 
 <pre><code class="r">require(dplyr, quietly = TRUE)
-intervalsByDay &lt;- data %&gt;%
+</code></pre>
+
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;
+## 
+## The following object is masked from &#39;package:stats&#39;:
+## 
+##     filter
+## 
+## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union
+</code></pre>
+
+<pre><code class="r">intervalsByDay &lt;- data %&gt;%
     mutate(dayint = paste0(format(as.Date(date), &quot;%a&quot;), formatC(interval, flag = &quot;0&quot;, width = 4))) %&gt;%
     select(dayint, steps) %&gt;%
     group_by(dayint) %&gt;%
@@ -385,13 +407,13 @@ imputedData &lt;- imputedData %&gt;%
 number of steps taken per day, and then show in a histogram.</p>
 
 <pre><code class="r">dailyImputedTotals &lt;- aggregate(steps ~ date, imputedData, FUN = sum)
-stepsMean &lt;- mean(dailyImputedTotals$steps)
-stepsMedian &lt;- median(dailyImputedTotals$steps)
+
+## calculate mean and median from daily imputed totals
+stepsMean &lt;- prettyNum(mean(dailyImputedTotals$steps), big.mark=&quot;,&quot;)
+stepsMedian &lt;- prettyNum(median(dailyImputedTotals$steps), big.mark=&quot;,&quot;)
 </code></pre>
 
-<p>The mean number of steps was <strong>9,705</strong>
-per day. <em>(Rounded up from <strong>9,704.656</strong> as fractional 
-steps do not make sense.)</em><br/>
+<p>The mean number of steps was <strong>9,704.656</strong> per day.<br/>
 The median number of steps was <strong>10,395</strong> per day. </p>
 
 <p>Notice that imputed data shows an increase in frequency of lesser steps. This 

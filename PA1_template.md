@@ -60,43 +60,47 @@ Load data into a data frame:
 ```r
 require(utils, quietly = TRUE)
 
-# unzip overwriting existing directory to ensure clean setup
+## unzip overwriting existing directory to ensure clean setup
 if (!file.exists("activity.csv")) {
-    # download archive into local directory
+    ## download archive into local directory
     zipFileName <- file.path("activity.zip")
     if (!file.exists(zipFileName)) {
         zipUrl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
         download.file(zipUrl, destfile = zipFileName, method = "curl", mode = "wb")
         print(paste(Sys.time(), "archive downloaded"))
     }
-    # unpack archive
+    ## unpack archive
     unzip(zipFileName, overwrite = FALSE)
     print(paste(Sys.time(), "archive unpacked"))
 }
 
-# load into data frame and convert date column to date
+## load into data frame and convert date column to date
 data <- read.csv("activity.csv", stringsAsFactors = FALSE)
 data <- transform(data, date = as.Date(data$date, "%Y-%m-%d"))
+
+## what period does the data cover?
+fromDate <- format(min(data$date), "%a %b %d, %Y")
+toDate <- format(max(data$date), "%a %b %d, %Y")
 ```
 
 ## What is mean total number of steps taken per day?
 
 The following histogram shows the total number of steps taken each day during 
-the two month period from **Mon Oct 01, 2012**
-to **Fri Nov 30, 2012**. This ignores days for which 
-no data was recorded.
+the two month period  
+from **Mon Oct 01, 2012** to **Fri Nov 30, 2012**.  
+This excludes days for which no steps data was recorded.
 
 Aggregate the total number of steps per day:
 
 ```r
 dailyTotals <- aggregate(steps ~ date, data, FUN = sum)
-stepsMean <- mean(dailyTotals$steps)
-stepsMedian <- median(dailyTotals$steps)
+
+## calculate mean and median from daily totals
+stepsMean <- prettyNum(mean(dailyTotals$steps), big.mark=",")
+stepsMedian <- prettyNum(median(dailyTotals$steps), big.mark=",")
 ```
 
-The mean number of steps was **10,766** per
-day. _(Rounded up from **10,766.19** as fractional steps 
-do not make sense.)_  
+The mean number of steps was **10,766.19** per day.  
 The median number of steps was **10,765** per day. 
 
 Below is a plot showing the total number of steps per day as a histogram:
@@ -124,12 +128,13 @@ Average the number of steps taken across all days:
 
 ```r
 intervalTotals <- aggregate(steps ~ interval, data, FUN = mean)
-maxSteps <- subset(intervalTotals, subset = steps == max(steps), select = "interval")
+
+## what was interval containing the maximum number of steps?
+maxStepsInterval <- intervalTotals[which.max(intervalTotals$steps), "interval"]
 ```
 
 The 5-minute interval which on average across all the days in the dataset
-contains the maximum number of steps is
-**835**.
+contains the maximum number of steps is **835**.
 This peak is shown in the time series (line) plot of the 5-minute intervals and
 the number of steps taken averaged across all days:
 
@@ -158,11 +163,16 @@ Note that there are a number of days/intervals where there are missing
 values (coded as `NA`). The presence of missing days may introduce
 bias into some calculations or summaries of the data.
 
+
+```r
+missingSteps <- nrow(data[is.na(data$steps),])
+totalSteps <- nrow(data)
+percentSteps <- round(missingSteps / totalSteps * 100)
+```
+
 There is missing steps data represented by rows with steps value of `NA`.
-There are **2304** of **17568**
-rows without step values. That is, around
-**13**% of 
-step data is missing.
+There are **2304** of **17568** rows without step values. 
+That is, around **13**% of step data is missing.
 
 We will impute missing steps using the _median_ for that _weekdays_ 5-minute 
 interval. That is, modelling against similar activity by day of week. Firstly,
@@ -170,6 +180,22 @@ calculate the median by weekday:
 
 ```r
 require(dplyr, quietly = TRUE)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+## 
+## The following object is masked from 'package:stats':
+## 
+##     filter
+## 
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 intervalsByDay <- data %>%
     mutate(dayint = paste0(format(as.Date(date), "%a"), formatC(interval, flag = "0", width = 4))) %>%
     select(dayint, steps) %>%
@@ -199,13 +225,13 @@ number of steps taken per day, and then show in a histogram.
 
 ```r
 dailyImputedTotals <- aggregate(steps ~ date, imputedData, FUN = sum)
-stepsMean <- mean(dailyImputedTotals$steps)
-stepsMedian <- median(dailyImputedTotals$steps)
+
+## calculate mean and median from daily imputed totals
+stepsMean <- prettyNum(mean(dailyImputedTotals$steps), big.mark=",")
+stepsMedian <- prettyNum(median(dailyImputedTotals$steps), big.mark=",")
 ```
 
-The mean number of steps was **9,705**
-per day. _(Rounded up from **9,704.656** as fractional 
-steps do not make sense.)_  
+The mean number of steps was **9,704.656** per day.  
 The median number of steps was **10,395** per day. 
 
 Notice that imputed data shows an increase in frequency of lesser steps. This 
