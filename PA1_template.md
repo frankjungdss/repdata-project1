@@ -1,10 +1,11 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
-output: 
+output:
   html_document:
     keep_md: yes
-    toc: yes
 ---
+
+# Reproducible Research: Peer Assessment 1
 
 ## Introduction
 
@@ -51,7 +52,7 @@ Ensure that we show all our working:
 
 ```r
 require(knitr, quietly = TRUE)
-opts_chunk$set(echo = TRUE, cache = TRUE)
+opts_chunk$set(echo = TRUE, cache = TRUE, fig.width = 10)
 ```
 
 Load data into a data frame:
@@ -174,22 +175,6 @@ We will impute this missing steps data using the _median_ for that _weekdays_
 
 ```r
 require(dplyr, quietly = TRUE)
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-## 
-## The following object is masked from 'package:stats':
-## 
-##     filter
-## 
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-```r
 intervalsByDay <- data %>%
     mutate(dayint = paste0(format(as.Date(date), "%a"), formatC(interval, flag = "0", width = 4))) %>%
     select(dayint, steps) %>%
@@ -280,7 +265,7 @@ imputedWeekDayData %>%
     scale_x_discrete(breaks = pretty_breaks(15)) +
     scale_y_continuous(breaks = pretty_breaks(10)) +
     labs(x = "Interval") +
-    labs(y = "Averaged Steps") +
+    labs(y = "Steps (averaged)") +
     facet_grid(weekday ~ .) +
     ggtitle("Time Series: averaged steps in 5 minute intervals by weekday/weekend")
 ```
