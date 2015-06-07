@@ -168,8 +168,9 @@ interval. That is, modelling against similar activity by day of week. Firstly,
 calculate the median by weekday:
 ```{r getmedian}
 require(dplyr, quietly = TRUE)
+## create key "dayint" used for matching against data, where day is a weekday
 intervalsByDay <- data %>%
-    mutate(dayint = paste0(format(as.Date(date), "%a"), formatC(interval, flag = "0", width = 4))) %>%
+    mutate(dayint = paste0(format(date, "%a"), formatC(interval, flag = "0", width = 4))) %>%
     select(dayint, steps) %>%
     group_by(dayint) %>%
     summarise(median = as.integer(median(steps, na.rm = TRUE)))
@@ -178,13 +179,13 @@ intervalsByDay <- data %>%
 Now, using these day/interval medians impute the missing steps data:
 ```{r imputesteps}
 require(dplyr, quietly = TRUE)
+## create a key field to use for merging with intervalsByDay
 imputedData <- data %>%
-    mutate(dayint = paste0(format(as.Date(date), "%a"), 
-                           formatC(interval, flag = "0", width = 4))) %>%
+    mutate(dayint = paste0(format(date, "%a"), formatC(interval, flag = "0", width = 4))) %>%
     select(dayint, date, interval, steps)
 ## merge median for days interval into data frame (this adds a median column)
-imputedData <- merge(imputedData, intervalsByDay)
-## where steps is missing use day interval median
+imputedData <- merge(imputedData, intervalsByDay, by = "dayint")
+## where steps is missing (NA) use the median of the weekday interval
 imputedData <- imputedData %>%
     mutate(steps = ifelse(is.na(steps), median, steps)) %>%
     select(date, interval, steps)
