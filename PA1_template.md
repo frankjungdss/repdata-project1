@@ -51,14 +51,14 @@ For convience the raw dataset is included in this repository.
 Ensure that we show all our working and set global defaults:
 
 ```r
-require(knitr, quietly = TRUE)
+require(knitr)
 opts_chunk$set(echo = TRUE, cache = TRUE, fig.width = 10)
 ```
 
 Load data into a data frame:
 
 ```r
-require(utils, quietly = TRUE)
+require(utils)
 
 ## unzip overwriting existing directory to ensure clean setup
 if (!file.exists("activity.csv")) {
@@ -106,9 +106,9 @@ The median number of steps was **10,765** per day.
 Below is a plot showing the total number of steps per day as a histogram:
 
 ```r
-require(magrittr, quietly = TRUE)
-require(ggplot2, quietly = TRUE)
-require(scales, quietly = TRUE)
+require(magrittr)
+require(ggplot2)
+require(scales)
 dailyTotals %>%
     ggplot(aes(steps)) + 
     geom_histogram(binwidth = 1000, fill = "purple", colour = "black", alpha = 0.7) +
@@ -140,9 +140,9 @@ the number of steps taken averaged across all days:
 
 
 ```r
-require(magrittr, quietly = TRUE)
-require(ggplot2, quietly = TRUE)
-require(scales, quietly = TRUE)
+require(magrittr)
+require(ggplot2)
+require(scales)
 intervalTotals %>%
     ggplot(aes(interval, steps)) + 
     geom_line(colour = "purple") +
@@ -179,25 +179,10 @@ interval. That is, modelling against similar activity by day of week. Firstly,
 calculate the median by weekday:
 
 ```r
-require(dplyr, quietly = TRUE)
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-## 
-## The following object is masked from 'package:stats':
-## 
-##     filter
-## 
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-```r
+require(dplyr)
+## create key "dayint" used for matching against data, where day is a weekday
 intervalsByDay <- data %>%
-    mutate(dayint = paste0(format(as.Date(date), "%a"), formatC(interval, flag = "0", width = 4))) %>%
+    mutate(dayint = paste0(format(date, "%a"), formatC(interval, flag = "0", width = 4))) %>%
     select(dayint, steps) %>%
     group_by(dayint) %>%
     summarise(median = as.integer(median(steps, na.rm = TRUE)))
@@ -206,14 +191,14 @@ intervalsByDay <- data %>%
 Now, using these day/interval medians impute the missing steps data:
 
 ```r
-require(dplyr, quietly = TRUE)
+require(dplyr)
+## create a key field to use for merging with intervalsByDay
 imputedData <- data %>%
-    mutate(dayint = paste0(format(as.Date(date), "%a"), 
-                           formatC(interval, flag = "0", width = 4))) %>%
+    mutate(dayint = paste0(format(date, "%a"), formatC(interval, flag = "0", width = 4))) %>%
     select(dayint, date, interval, steps)
 ## merge median for days interval into data frame (this adds a median column)
-imputedData <- merge(imputedData, intervalsByDay)
-## where steps is missing use day interval median
+imputedData <- merge(imputedData, intervalsByDay, by = "dayint")
+## where steps is missing (NA) use the median of the weekday interval
 imputedData <- imputedData %>%
     mutate(steps = ifelse(is.na(steps), median, steps)) %>%
     select(date, interval, steps)
@@ -240,9 +225,9 @@ leaving the median step count unchanged.
 
 
 ```r
-require(magrittr, quietly = TRUE)
-require(ggplot2, quietly = TRUE)
-require(scales, quietly = TRUE)
+require(magrittr)
+require(ggplot2)
+require(scales)
 dailyImputedTotals %>%
     ggplot(aes(steps)) + 
     geom_histogram(binwidth = 1000, fill = "purple", colour = "black", alpha = 0.7) +
@@ -261,7 +246,7 @@ Using imputed data, we will now compare weekday activity to weekends.
 
 
 ```r
-require(dplyr, quietly = TRUE)
+require(dplyr)
 ## create a factor for weekday / weekend
 ## format %u gives weekday as a decimal number (1–7, Monday is 1)
 ## so weekdays are when %u = 1..5, weekends when %u = 6, 7
@@ -276,9 +261,9 @@ The following time series plot shows the 5-minute interval by weekday/weekend:
 
 
 ```r
-require(magrittr, quietly = TRUE)
-require(ggplot2, quietly = TRUE)
-require(scales, quietly = TRUE)
+require(magrittr)
+require(ggplot2)
+require(scales)
 imputedWeekDayData %>%
     ggplot(aes(x = interval, y = average)) + 
     geom_line(colour = "purple") +

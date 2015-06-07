@@ -248,13 +248,13 @@ total of 17,568 observations in this dataset.</p>
 
 <p>Ensure that we show all our working and set global defaults:</p>
 
-<pre><code class="r">require(knitr, quietly = TRUE)
+<pre><code class="r">require(knitr)
 opts_chunk$set(echo = TRUE, cache = TRUE, fig.width = 10)
 </code></pre>
 
 <p>Load data into a data frame:</p>
 
-<pre><code class="r">require(utils, quietly = TRUE)
+<pre><code class="r">require(utils)
 
 ## unzip overwriting existing directory to ensure clean setup
 if (!file.exists(&quot;activity.csv&quot;)) {
@@ -300,9 +300,9 @@ The median number of steps was <strong>10,765</strong> per day. </p>
 
 <p>Below is a plot showing the total number of steps per day as a histogram:</p>
 
-<pre><code class="r">require(magrittr, quietly = TRUE)
-require(ggplot2, quietly = TRUE)
-require(scales, quietly = TRUE)
+<pre><code class="r">require(magrittr)
+require(ggplot2)
+require(scales)
 dailyTotals %&gt;%
     ggplot(aes(steps)) + 
     geom_histogram(binwidth = 1000, fill = &quot;purple&quot;, colour = &quot;black&quot;, alpha = 0.7) +
@@ -330,9 +330,9 @@ contains the maximum number of steps is <strong>835</strong>.
 This peak is shown in the time series (line) plot of the 5-minute intervals and
 the number of steps taken averaged across all days:</p>
 
-<pre><code class="r">require(magrittr, quietly = TRUE)
-require(ggplot2, quietly = TRUE)
-require(scales, quietly = TRUE)
+<pre><code class="r">require(magrittr)
+require(ggplot2)
+require(scales)
 intervalTotals %&gt;%
     ggplot(aes(interval, steps)) + 
     geom_line(colour = &quot;purple&quot;) +
@@ -366,23 +366,10 @@ That is, around <strong>13</strong>% of step data is missing.</p>
 interval. That is, modelling against similar activity by day of week. Firstly,
 calculate the median by weekday:</p>
 
-<pre><code class="r">require(dplyr, quietly = TRUE)
-</code></pre>
-
-<pre><code>## 
-## Attaching package: &#39;dplyr&#39;
-## 
-## The following object is masked from &#39;package:stats&#39;:
-## 
-##     filter
-## 
-## The following objects are masked from &#39;package:base&#39;:
-## 
-##     intersect, setdiff, setequal, union
-</code></pre>
-
-<pre><code class="r">intervalsByDay &lt;- data %&gt;%
-    mutate(dayint = paste0(format(as.Date(date), &quot;%a&quot;), formatC(interval, flag = &quot;0&quot;, width = 4))) %&gt;%
+<pre><code class="r">require(dplyr)
+## create key &quot;dayint&quot; used for matching against data, where day is a weekday
+intervalsByDay &lt;- data %&gt;%
+    mutate(dayint = paste0(format(date, &quot;%a&quot;), formatC(interval, flag = &quot;0&quot;, width = 4))) %&gt;%
     select(dayint, steps) %&gt;%
     group_by(dayint) %&gt;%
     summarise(median = as.integer(median(steps, na.rm = TRUE)))
@@ -390,14 +377,14 @@ calculate the median by weekday:</p>
 
 <p>Now, using these day/interval medians impute the missing steps data:</p>
 
-<pre><code class="r">require(dplyr, quietly = TRUE)
+<pre><code class="r">require(dplyr)
+## create a key field to use for merging with intervalsByDay
 imputedData &lt;- data %&gt;%
-    mutate(dayint = paste0(format(as.Date(date), &quot;%a&quot;), 
-                           formatC(interval, flag = &quot;0&quot;, width = 4))) %&gt;%
+    mutate(dayint = paste0(format(date, &quot;%a&quot;), formatC(interval, flag = &quot;0&quot;, width = 4))) %&gt;%
     select(dayint, date, interval, steps)
 ## merge median for days interval into data frame (this adds a median column)
-imputedData &lt;- merge(imputedData, intervalsByDay)
-## where steps is missing use day interval median
+imputedData &lt;- merge(imputedData, intervalsByDay, by = &quot;dayint&quot;)
+## where steps is missing (NA) use the median of the weekday interval
 imputedData &lt;- imputedData %&gt;%
     mutate(steps = ifelse(is.na(steps), median, steps)) %&gt;%
     select(date, interval, steps)
@@ -420,9 +407,9 @@ The median number of steps was <strong>10,395</strong> per day. </p>
 has the side-effect of reducing the mean step count per day, while essentially 
 leaving the median step count unchanged.</p>
 
-<pre><code class="r">require(magrittr, quietly = TRUE)
-require(ggplot2, quietly = TRUE)
-require(scales, quietly = TRUE)
+<pre><code class="r">require(magrittr)
+require(ggplot2)
+require(scales)
 dailyImputedTotals %&gt;%
     ggplot(aes(steps)) + 
     geom_histogram(binwidth = 1000, fill = &quot;purple&quot;, colour = &quot;black&quot;, alpha = 0.7) +
@@ -439,7 +426,7 @@ dailyImputedTotals %&gt;%
 
 <p>Using imputed data, we will now compare weekday activity to weekends.</p>
 
-<pre><code class="r">require(dplyr, quietly = TRUE)
+<pre><code class="r">require(dplyr)
 ## create a factor for weekday / weekend
 ## format %u gives weekday as a decimal number (1–7, Monday is 1)
 ## so weekdays are when %u = 1..5, weekends when %u = 6, 7
@@ -452,9 +439,9 @@ imputedWeekDayData &lt;- imputedData %&gt;%
 
 <p>The following time series plot shows the 5-minute interval by weekday/weekend:</p>
 
-<pre><code class="r">require(magrittr, quietly = TRUE)
-require(ggplot2, quietly = TRUE)
-require(scales, quietly = TRUE)
+<pre><code class="r">require(magrittr)
+require(ggplot2)
+require(scales)
 imputedWeekDayData %&gt;%
     ggplot(aes(x = interval, y = average)) + 
     geom_line(colour = &quot;purple&quot;) +
