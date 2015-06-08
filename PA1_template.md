@@ -13,16 +13,16 @@ It is now possible to collect a large amount of data about personal movement
 using activity monitoring devices such as a Fitbit, Nike Fuelband, or Jawbone
 Up. These type of devices are part of the “quantified self” movement – a group
 of enthusiasts who take measurements about themselves regularly to improve
-their health, to find patterns in their behavior, or because they are tech geeks.
-But these data remain under-utilized both because the raw data are hard to
-obtain and there is a lack of statistical methods and software for processing and
-interpreting the data.
+their health, to find patterns in their behavior, or because they are tech
+geeks. But these data remain under-utilized both because the raw data are hard
+to obtain and there is a lack of statistical methods and software for
+processing and interpreting the data.
 
 This assessment makes use of data from a personal activity monitoring device.
 This device collects data at 5 minute intervals through out the day. The data
 consists of two months of data from an anonymous individual collected during
-the months of October and November, 2012 and include the number of steps
-taken in 5 minute intervals each day.
+the months of October and November, 2012 and include the number of steps taken
+in 5 minute intervals each day.
 
 ## Data
 
@@ -77,16 +77,19 @@ if (!file.exists("activity.csv")) {
 ## load into data frame and convert date column to date
 data <- read.csv("activity.csv", stringsAsFactors = FALSE)
 data <- transform(data, date = as.Date(data$date, "%Y-%m-%d"))
+```
 
+## What is mean total number of steps taken per day?
+
+
+```r
 ## what period does the data cover?
 fromDate <- format(min(data$date), "%a %b %d, %Y")
 toDate <- format(max(data$date), "%a %b %d, %Y")
 ```
 
-## What is mean total number of steps taken per day?
-
-The following histogram shows the total number of steps taken each day during 
-the two month period  
+The following histogram shows the total number of steps taken each day during
+the two month period   
 from **Mon Oct 01, 2012** to **Fri Nov 30, 2012**.  
 This excludes days for which no steps data was recorded.
 
@@ -104,6 +107,7 @@ The mean number of steps was **10,766.19** per day.
 The median number of steps was **10,765** per day. 
 
 Below is a plot showing the total number of steps per day as a histogram:
+
 
 ```r
 require(magrittr)
@@ -134,9 +138,9 @@ maxStepsInterval <- intervalTotals[which.max(intervalTotals$steps), "interval"]
 ```
 
 The 5-minute interval which on average across all the days in the dataset
-contains the maximum number of steps is **835**.
-This peak is shown in the time series (line) plot of the 5-minute intervals and
-the number of steps taken averaged across all days:
+contains the maximum number of steps is **835**. This peak is
+shown in the time series (line) plot of the 5-minute intervals and the number
+of steps taken averaged across all days:
 
 
 ```r
@@ -159,9 +163,9 @@ intervalTotals %>%
 
 ## Imputing missing values
 
-Note that there are a number of days/intervals where there are missing
-values (coded as `NA`). The presence of missing days may introduce
-bias into some calculations or summaries of the data.
+Note that there are a number of days/intervals where there are missing values
+(coded as `NA`). The presence of missing days may introduce bias into some
+calculations or summaries of the data.
 
 
 ```r
@@ -173,12 +177,13 @@ totalSteps <- prettyNum(ts, big.mark = ",")
 percentSteps <- percent(ms/ts)
 ```
 
-There are **2,304** of **17,568** rows without step values, 
-which is around **13.1%** of missing data.
+There are **2,304** of **17,568** rows without step values,
+which is around **13.1%**.
 
-We will impute missing steps using the _median_ for that _weekdays_ 5-minute 
+We will impute missing steps using the _median_ for that _weekdays_ 5-minute
 interval. That is modelling against similar activity by day of week. Firstly,
 calculate the median by weekday:
+
 
 ```r
 require(dplyr)
@@ -191,6 +196,7 @@ intervalsByDay <- data %>%
 ```
 
 Impute the missing steps data using weekday/interval medians:
+
 
 ```r
 require(dplyr)
@@ -206,7 +212,7 @@ imputedData <- imputedData %>%
     select(date, interval, steps)
 ```
 
-Further analysis will use these imputed results. Firstly, summarise the total 
+Further analysis will use these imputed results. Firstly, summarise the total
 number of steps taken per day, and show in a histogram:
 
 
@@ -221,8 +227,8 @@ stepsMedian <- prettyNum(median(dailyImputedTotals$steps), big.mark=",")
 The mean number of steps was **9,704.656** per day.  
 The median number of steps was **10,395** per day. 
 
-Notice that imputed data shows an increase in frequency of lesser steps. This 
-has the side-effect of reducing the mean step count per day, while essentially 
+Notice that imputed data shows an increase in frequency of lesser steps. This
+has the side-effect of reducing the mean step count per day, while essentially
 leaving the median step count unchanged.
 
 
@@ -281,5 +287,5 @@ imputedWeekDayData %>%
 ![plot of chunk timeseriesimputed](figure/timeseriesimputed-1.png) 
 
 The weekday step average is higher in the morning, possibly indicating that the
-individual was active earlier during a weekday. Also, on weekends, there appears
-to be more activity throughout the day.
+individual was active earlier during a weekday. Also, on weekends, there
+appears to be more activity throughout the day.
