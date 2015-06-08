@@ -165,17 +165,19 @@ bias into some calculations or summaries of the data.
 
 
 ```r
-missingSteps <- nrow(data[is.na(data$steps),])
-totalSteps <- nrow(data)
-percentSteps <- round(missingSteps / totalSteps * 100)
+require(scales)
+ms <- sum(is.na(data$steps))
+ts <- length(data$steps)
+missingSteps <- prettyNum(ms, big.mark = ",")
+totalSteps <- prettyNum(ts, big.mark = ",")
+percentSteps <- percent(ms/ts)
 ```
 
-There is missing steps data represented by rows with steps value of `NA`.
-There are **2304** of **17568** rows without step values. 
-That is, around **13**% of step data is missing.
+There are **2,304** of **17,568** rows without step values, 
+which is around **13.1%** of missing data.
 
 We will impute missing steps using the _median_ for that _weekdays_ 5-minute 
-interval. That is, modelling against similar activity by day of week. Firstly,
+interval. That is modelling against similar activity by day of week. Firstly,
 calculate the median by weekday:
 
 ```r
@@ -188,7 +190,7 @@ intervalsByDay <- data %>%
     summarise(median = as.integer(median(steps, na.rm = TRUE)))
 ```
 
-Now, using these day/interval medians impute the missing steps data:
+Impute the missing steps data using weekday/interval medians:
 
 ```r
 require(dplyr)
@@ -205,7 +207,7 @@ imputedData <- imputedData %>%
 ```
 
 Further analysis will use these imputed results. Firstly, summarise the total 
-number of steps taken per day, and then show in a histogram.
+number of steps taken per day, and show in a histogram:
 
 
 ```r
@@ -242,7 +244,7 @@ dailyImputedTotals %>%
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-Using imputed data, we will now compare weekday activity to weekends.
+Using imputed data compare weekday activity to weekends:
 
 
 ```r

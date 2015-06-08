@@ -154,17 +154,19 @@ values (coded as `NA`). The presence of missing days may introduce
 bias into some calculations or summaries of the data.
 
 ```{r missing}
-missingSteps <- nrow(data[is.na(data$steps),])
-totalSteps <- nrow(data)
-percentSteps <- round(missingSteps / totalSteps * 100)
+require(scales)
+ms <- sum(is.na(data$steps))
+ts <- length(data$steps)
+missingSteps <- prettyNum(ms, big.mark = ",")
+totalSteps <- prettyNum(ts, big.mark = ",")
+percentSteps <- percent(ms/ts)
 ```
 
-There is missing steps data represented by rows with steps value of `NA`.
-There are **`r missingSteps`** of **`r totalSteps`** rows without step values. 
-That is, around **`r percentSteps`**% of step data is missing.
+There are **`r missingSteps`** of **`r totalSteps`** rows without step values, 
+which is around **`r percentSteps`** of missing data.
 
 We will impute missing steps using the _median_ for that _weekdays_ 5-minute 
-interval. That is, modelling against similar activity by day of week. Firstly,
+interval. That is modelling against similar activity by day of week. Firstly,
 calculate the median by weekday:
 ```{r getmedian}
 require(dplyr)
@@ -176,7 +178,7 @@ intervalsByDay <- data %>%
     summarise(median = as.integer(median(steps, na.rm = TRUE)))
 ```
 
-Now, using these day/interval medians impute the missing steps data:
+Impute the missing steps data using weekday/interval medians:
 ```{r imputesteps}
 require(dplyr)
 ## create a key field to use for merging with intervalsByDay
@@ -192,7 +194,7 @@ imputedData <- imputedData %>%
 ```
 
 Further analysis will use these imputed results. Firstly, summarise the total 
-number of steps taken per day, and then show in a histogram.
+number of steps taken per day, and show in a histogram:
 
 ```{r dailyimputed}
 dailyImputedTotals <- aggregate(steps ~ date, imputedData, FUN = sum)
@@ -225,7 +227,7 @@ dailyImputedTotals %>%
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-Using imputed data, we will now compare weekday activity to weekends.
+Using imputed data compare weekday activity to weekends:
 
 ```{r imputedweekdays}
 require(dplyr)

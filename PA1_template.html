@@ -353,17 +353,19 @@ intervalTotals %&gt;%
 values (coded as <code>NA</code>). The presence of missing days may introduce
 bias into some calculations or summaries of the data.</p>
 
-<pre><code class="r">missingSteps &lt;- nrow(data[is.na(data$steps),])
-totalSteps &lt;- nrow(data)
-percentSteps &lt;- round(missingSteps / totalSteps * 100)
+<pre><code class="r">require(scales)
+ms &lt;- sum(is.na(data$steps))
+ts &lt;- length(data$steps)
+missingSteps &lt;- prettyNum(ms, big.mark = &quot;,&quot;)
+totalSteps &lt;- prettyNum(ts, big.mark = &quot;,&quot;)
+percentSteps &lt;- percent(ms/ts)
 </code></pre>
 
-<p>There is missing steps data represented by rows with steps value of <code>NA</code>.
-There are <strong>2304</strong> of <strong>17568</strong> rows without step values. 
-That is, around <strong>13</strong>% of step data is missing.</p>
+<p>There are <strong>2,304</strong> of <strong>17,568</strong> rows without step values, 
+which is around <strong>13.1%</strong> of missing data.</p>
 
 <p>We will impute missing steps using the <em>median</em> for that <em>weekdays</em> 5-minute 
-interval. That is, modelling against similar activity by day of week. Firstly,
+interval. That is modelling against similar activity by day of week. Firstly,
 calculate the median by weekday:</p>
 
 <pre><code class="r">require(dplyr)
@@ -375,7 +377,7 @@ intervalsByDay &lt;- data %&gt;%
     summarise(median = as.integer(median(steps, na.rm = TRUE)))
 </code></pre>
 
-<p>Now, using these day/interval medians impute the missing steps data:</p>
+<p>Impute the missing steps data using weekday/interval medians:</p>
 
 <pre><code class="r">require(dplyr)
 ## create a key field to use for merging with intervalsByDay
@@ -391,7 +393,7 @@ imputedData &lt;- imputedData %&gt;%
 </code></pre>
 
 <p>Further analysis will use these imputed results. Firstly, summarise the total 
-number of steps taken per day, and then show in a histogram.</p>
+number of steps taken per day, and show in a histogram:</p>
 
 <pre><code class="r">dailyImputedTotals &lt;- aggregate(steps ~ date, imputedData, FUN = sum)
 
@@ -424,7 +426,7 @@ dailyImputedTotals %&gt;%
 
 <h2>Are there differences in activity patterns between weekdays and weekends?</h2>
 
-<p>Using imputed data, we will now compare weekday activity to weekends.</p>
+<p>Using imputed data compare weekday activity to weekends:</p>
 
 <pre><code class="r">require(dplyr)
 ## create a factor for weekday / weekend
