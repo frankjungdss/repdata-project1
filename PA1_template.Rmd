@@ -5,8 +5,6 @@ output:
     keep_md: yes
 ---
 
-# Reproducible Research: Peer Assessment 1
-
 ## Introduction
 
 It is now possible to collect a large amount of data about personal movement
@@ -35,13 +33,13 @@ The variables included in this dataset are:
 * **steps**: Number of steps taking in a 5-minute interval (missing
     values are coded as `NA`)
 
-* **date**: The date on which the measurement was taken in YYYY-MM-DD
+* **date**: The date on which the measurement was taken in `YYYY-MM-DD`
     format
 
 * **interval**: Identifier for the 5-minute interval in which
     measurement was taken
 
-The dataset is stored in a comma-separated-value (CSV) file and there are a 
+The dataset is stored in a comma-separated-value (`CSV`) file and there are a 
 total of 17,568 observations in this dataset.
 
 For convience the raw dataset is included in this repository.
@@ -49,9 +47,9 @@ For convience the raw dataset is included in this repository.
 ## Loading and preprocessing the data
 
 Ensure that we show all our working and set global defaults:
-```{r setoptions, echo=TRUE}
+```{r setoptions, echo=TRUE, message=F, warning=F}
 require(knitr)
-opts_chunk$set(echo = TRUE, cache = TRUE, fig.width = 10)
+opts_chunk$set(fig.path = "figure/", cache.path = 'cache/', echo = TRUE, cache = TRUE, fig.width = 10)
 ```
 
 Load data into a data frame:

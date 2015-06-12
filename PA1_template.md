@@ -1,10 +1,3 @@
----
-title: 'Reproducible Research: Peer Assessment 1'
-output:
-  html_document:
-    keep_md: yes
----
-
 # Reproducible Research: Peer Assessment 1
 
 ## Introduction
@@ -35,13 +28,13 @@ The variables included in this dataset are:
 * **steps**: Number of steps taking in a 5-minute interval (missing
     values are coded as `NA`)
 
-* **date**: The date on which the measurement was taken in YYYY-MM-DD
+* **date**: The date on which the measurement was taken in `YYYY-MM-DD`
     format
 
 * **interval**: Identifier for the 5-minute interval in which
     measurement was taken
 
-The dataset is stored in a comma-separated-value (CSV) file and there are a 
+The dataset is stored in a comma-separated-value (`CSV`) file and there are a 
 total of 17,568 observations in this dataset.
 
 For convience the raw dataset is included in this repository.
@@ -52,7 +45,7 @@ Ensure that we show all our working and set global defaults:
 
 ```r
 require(knitr)
-opts_chunk$set(echo = TRUE, cache = TRUE, fig.width = 10)
+opts_chunk$set(fig.path = "figure/", cache.path = 'cache/', echo = TRUE, cache = TRUE, fig.width = 10)
 ```
 
 Load data into a data frame:
@@ -123,7 +116,7 @@ dailyTotals %>%
     ggtitle("Histogram: total steps per day")
 ```
 
-![plot of chunk histogram](figure/histogram-1.png) 
+![](figure/histogram-1.png) 
 
 ## What is the average daily activity pattern?
 
@@ -159,7 +152,7 @@ intervalTotals %>%
     ggtitle("Time Series: steps per 5-minute interval")
 ```
 
-![plot of chunk timeseries](figure/timeseries-1.png) 
+![](figure/timeseries-1.png) 
 
 ## Imputing missing values
 
@@ -246,7 +239,7 @@ dailyImputedTotals %>%
     ggtitle("Histogram: total imputed steps per day")
 ```
 
-![plot of chunk histogramimputed](figure/histogramimputed-1.png) 
+![](figure/histogramimputed-1.png) 
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -284,7 +277,7 @@ imputedWeekDayData %>%
     ggtitle("Time Series: averaged steps in 5 minute intervals by weekday/weekend")
 ```
 
-![plot of chunk timeseriesimputed](figure/timeseriesimputed-1.png) 
+![](figure/timeseriesimputed-1.png) 
 
 The weekday step average is higher in the morning, possibly indicating that the
 individual was active earlier during a weekday. Also, on weekends, there
