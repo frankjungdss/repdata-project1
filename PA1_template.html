@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
-<title>Introduction</title>
+<title>Reproducible Research: Peer Assessment 1</title>
 
 <script type="text/javascript">
 window.onload = function() {
@@ -201,6 +201,8 @@ hr {
 </head>
 
 <body>
+<h1>Reproducible Research: Peer Assessment 1</h1>
+
 <h2>Introduction</h2>
 
 <p>It is now possible to collect a large amount of data about personal movement
@@ -247,49 +249,48 @@ total of 17,568 observations in this dataset.</p>
 <p>Ensure that we show all our working and set global defaults:</p>
 
 <pre><code class="r">require(knitr)
+require(utils)
+require(ggplot2)
+require(scales)
+require(dplyr)
 opts_chunk$set(fig.path = &quot;figure/&quot;, cache.path = &quot;cache/&quot;, echo = TRUE, cache = TRUE, fig.width = 10)
 </code></pre>
 
 <p>Load data into a data frame:</p>
 
-<pre><code class="r">require(utils)
-
-## unzip overwriting existing directory to ensure clean setup
+<pre><code class="r"># unzip overwriting existing directory to ensure clean setup
 if (!file.exists(&quot;activity.csv&quot;)) {
-    ## download archive into local directory
+    # download archive into local directory
     zipFileName &lt;- file.path(&quot;activity.zip&quot;)
     if (!file.exists(zipFileName)) {
         zipUrl &lt;- &quot;https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip&quot;
         download.file(zipUrl, destfile = zipFileName, method = &quot;curl&quot;, mode = &quot;wb&quot;)
         print(paste(Sys.time(), &quot;archive downloaded&quot;))
     }
-    ## unpack archive
+    # unpack archive
     unzip(zipFileName, overwrite = FALSE)
     print(paste(Sys.time(), &quot;archive unpacked&quot;))
 }
 
-## load into data frame and convert date column to date
+# load into data frame and convert date column to date
 data &lt;- read.csv(&quot;activity.csv&quot;, stringsAsFactors = FALSE)
 data &lt;- transform(data, date = as.Date(data$date, &quot;%Y-%m-%d&quot;))
 </code></pre>
 
 <h2>What is mean total number of steps taken per day?</h2>
 
-<pre><code class="r">## what period does the data cover?
+<pre><code class="r"># what period does the data cover?
 fromDate &lt;- format(min(data$date), &quot;%a %b %d, %Y&quot;)
 toDate &lt;- format(max(data$date), &quot;%a %b %d, %Y&quot;)
 </code></pre>
 
-<p>The following histogram shows the total number of steps taken each day during
-the two month period<br/>
+<p>Total the number of steps taken each day during the two month period<br/>
 from <strong>Mon Oct 01, 2012</strong> to <strong>Fri Nov 30, 2012</strong>.<br/>
 This excludes days for which no steps data was recorded.</p>
 
-<p>Aggregate the total number of steps per day:</p>
-
 <pre><code class="r">dailyTotals &lt;- aggregate(steps ~ date, data, FUN = sum)
 
-## calculate mean and median from daily totals
+# calculate mean and median from daily totals
 stepsMean &lt;- prettyNum(mean(dailyTotals$steps), big.mark=&quot;,&quot;)
 stepsMedian &lt;- prettyNum(median(dailyTotals$steps), big.mark=&quot;,&quot;)
 </code></pre>
@@ -297,12 +298,9 @@ stepsMedian &lt;- prettyNum(median(dailyTotals$steps), big.mark=&quot;,&quot;)
 <p>The mean number of steps was <strong>10,766.19</strong> per day.<br/>
 The median number of steps was <strong>10,765</strong> per day. </p>
 
-<p>Below is a plot showing the total number of steps per day as a histogram:</p>
+<p>Show a histogram of the frequency of total steps:</p>
 
-<pre><code class="r">require(magrittr)
-require(ggplot2)
-require(scales)
-dailyTotals %&gt;%
+<pre><code class="r">dailyTotals %&gt;%
     ggplot(aes(steps)) + 
     geom_histogram(binwidth = 1000, fill = &quot;purple&quot;, colour = &quot;black&quot;, alpha = 0.7) +
     theme_light(base_family = &quot;Avenir&quot;, base_size = 11) +
@@ -320,19 +318,16 @@ dailyTotals %&gt;%
 
 <pre><code class="r">intervalTotals &lt;- aggregate(steps ~ interval, data, FUN = mean)
 
-## what was interval containing the maximum number of steps?
+# what was interval containing the maximum number of steps?
 maxStepsInterval &lt;- intervalTotals[which.max(intervalTotals$steps), &quot;interval&quot;]
 </code></pre>
 
-<p>The 5-minute interval which on average across all the days in the dataset
-contains the maximum number of steps is <strong>835</strong>. This peak is
-shown in the time series (line) plot of the 5-minute intervals and the number
-of steps taken averaged across all days:</p>
+<p>The 5-minute interval which on average across all the days in the dataset 
+contains the maximum number of steps is <strong>835</strong>. This peak is 
+shown in the time series (line) plot of the 5-minute intervals and the number of
+steps taken averaged across all days:</p>
 
-<pre><code class="r">require(magrittr)
-require(ggplot2)
-require(scales)
-intervalTotals %&gt;%
+<pre><code class="r">intervalTotals %&gt;%
     ggplot(aes(interval, steps)) + 
     geom_line(colour = &quot;purple&quot;) +
     theme_light(base_family = &quot;Avenir&quot;, base_size = 11) +
@@ -352,8 +347,7 @@ intervalTotals %&gt;%
 (coded as <code>NA</code>). The presence of missing days may introduce bias into some
 calculations or summaries of the data.</p>
 
-<pre><code class="r">require(scales)
-ms &lt;- sum(is.na(data$steps))
+<pre><code class="r">ms &lt;- sum(is.na(data$steps))
 ts &lt;- length(data$steps)
 missingSteps &lt;- prettyNum(ms, big.mark = &quot;,&quot;)
 totalSteps &lt;- prettyNum(ts, big.mark = &quot;,&quot;)
@@ -363,12 +357,13 @@ percentSteps &lt;- percent(ms/ts)
 <p>There are <strong>2,304</strong> of <strong>17,568</strong> rows without step values,
 which is around <strong>13.1%</strong>.</p>
 
-<p>We will impute missing steps using the <em>median</em> for that <em>weekdays</em> 5-minute
-interval. That is modelling against similar activity by day of week. Firstly,
-calculate the median by weekday:</p>
+<p>We will impute missing steps using the <em>median</em> for that <em>weekdays</em> 5-minute 
+interval. That is, we are modelling against similar activity for that time 
+interval for that day of week. Here, we are making the assumption that activity
+for a day is much the same: one Monday looks like any other Monday. To do this
+we must first calculate the median by weekday and 5-minute time interval:</p>
 
-<pre><code class="r">require(dplyr)
-## create key &quot;dayint&quot; used for matching against data, where day is a weekday
+<pre><code class="r"># create key &quot;dayint&quot; used for matching against data, where day is a weekday
 intervalsByDay &lt;- data %&gt;%
     mutate(dayint = paste0(format(date, &quot;%a&quot;), formatC(interval, flag = &quot;0&quot;, width = 4))) %&gt;%
     select(dayint, steps) %&gt;%
@@ -376,27 +371,27 @@ intervalsByDay &lt;- data %&gt;%
     summarise(median = as.integer(median(steps, na.rm = TRUE)))
 </code></pre>
 
-<p>Impute the missing steps data using weekday/interval medians:</p>
+<p>Now we can merge the median by day as an additional column. Then it is easy to
+impute the missing steps using the median for that weekdays 5-minute interval:</p>
 
-<pre><code class="r">require(dplyr)
-## create a key field to use for merging with intervalsByDay
+<pre><code class="r"># create a key field to use for merging with intervalsByDay
+# merge via left join median for days interval into data frame (this adds a median column)
+# where steps is missing (NA) use the median of the weekday interval
+# select only required columns
 imputedData &lt;- data %&gt;%
     mutate(dayint = paste0(format(date, &quot;%a&quot;), formatC(interval, flag = &quot;0&quot;, width = 4))) %&gt;%
-    select(dayint, date, interval, steps)
-## merge median for days interval into data frame (this adds a median column)
-imputedData &lt;- merge(imputedData, intervalsByDay, by = &quot;dayint&quot;)
-## where steps is missing (NA) use the median of the weekday interval
-imputedData &lt;- imputedData %&gt;%
+    select(dayint, date, interval, steps) %&gt;%
+    left_join(y = intervalsByDay, by = &quot;dayint&quot;) %&gt;%
     mutate(steps = ifelse(is.na(steps), median, steps)) %&gt;%
     select(date, interval, steps)
 </code></pre>
 
 <p>Further analysis will use these imputed results. Firstly, summarise the total
-number of steps taken per day, and show in a histogram:</p>
+number of steps taken per day, and show the total step frequency in a histogram:</p>
 
 <pre><code class="r">dailyImputedTotals &lt;- aggregate(steps ~ date, imputedData, FUN = sum)
 
-## calculate mean and median from daily imputed totals
+# calculate mean and median from daily imputed totals
 stepsMean &lt;- prettyNum(mean(dailyImputedTotals$steps), big.mark=&quot;,&quot;)
 stepsMedian &lt;- prettyNum(median(dailyImputedTotals$steps), big.mark=&quot;,&quot;)
 </code></pre>
@@ -408,10 +403,7 @@ The median number of steps was <strong>10,395</strong> per day. </p>
 has the side-effect of reducing the mean step count per day, while essentially
 leaving the median step count unchanged.</p>
 
-<pre><code class="r">require(magrittr)
-require(ggplot2)
-require(scales)
-dailyImputedTotals %&gt;%
+<pre><code class="r">dailyImputedTotals %&gt;%
     ggplot(aes(steps)) + 
     geom_histogram(binwidth = 1000, fill = &quot;purple&quot;, colour = &quot;black&quot;, alpha = 0.7) +
     theme_light(base_family = &quot;Avenir&quot;, base_size = 11) +
@@ -427,10 +419,9 @@ dailyImputedTotals %&gt;%
 
 <p>Using imputed data compare weekday activity to weekends:</p>
 
-<pre><code class="r">require(dplyr)
-## create a factor for weekday / weekend
-## format %u gives weekday as a decimal number (1–7, Monday is 1)
-## so weekdays are when %u = 1..5, weekends when %u = 6, 7
+<pre><code class="r"># create a factor for weekday / weekend
+# format %u gives weekday as a decimal number (1–7, Monday is 1)
+# so weekdays are when %u = 1..5, weekends when %u = 6, 7
 imputedWeekDayData &lt;- imputedData %&gt;%
     mutate(weekday = factor(ifelse(format(date, &quot;%u&quot;) &lt; 6, &quot;WeekDay&quot;, &quot;WeekEnd&quot;))) %&gt;%
     select(weekday, interval, steps) %&gt;%
@@ -440,10 +431,7 @@ imputedWeekDayData &lt;- imputedData %&gt;%
 
 <p>The following time series plot shows the 5-minute interval by weekday/weekend:</p>
 
-<pre><code class="r">require(magrittr)
-require(ggplot2)
-require(scales)
-imputedWeekDayData %&gt;%
+<pre><code class="r">imputedWeekDayData %&gt;%
     ggplot(aes(x = interval, y = average)) + 
     geom_line(colour = &quot;purple&quot;) +
     theme_light(base_family = &quot;Avenir&quot;, base_size = 11) +

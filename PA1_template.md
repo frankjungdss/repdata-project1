@@ -3,7 +3,10 @@ title: 'Reproducible Research: Peer Assessment 1'
 output:
   html_document:
     keep_md: yes
+    toc: yes
 ---
+
+# Reproducible Research: Peer Assessment 1
 
 ## Introduction
 
@@ -50,29 +53,31 @@ Ensure that we show all our working and set global defaults:
 
 ```r
 require(knitr)
+require(utils)
+require(ggplot2)
+require(scales)
+require(dplyr)
 opts_chunk$set(fig.path = "figure/", cache.path = "cache/", echo = TRUE, cache = TRUE, fig.width = 10)
 ```
 
 Load data into a data frame:
 
 ```r
-require(utils)
-
-## unzip overwriting existing directory to ensure clean setup
+# unzip overwriting existing directory to ensure clean setup
 if (!file.exists("activity.csv")) {
-    ## download archive into local directory
+    # download archive into local directory
     zipFileName <- file.path("activity.zip")
     if (!file.exists(zipFileName)) {
         zipUrl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
         download.file(zipUrl, destfile = zipFileName, method = "curl", mode = "wb")
         print(paste(Sys.time(), "archive downloaded"))
     }
-    ## unpack archive
+    # unpack archive
     unzip(zipFileName, overwrite = FALSE)
     print(paste(Sys.time(), "archive unpacked"))
 }
 
-## load into data frame and convert date column to date
+# load into data frame and convert date column to date
 data <- read.csv("activity.csv", stringsAsFactors = FALSE)
 data <- transform(data, date = as.Date(data$date, "%Y-%m-%d"))
 ```
@@ -81,22 +86,20 @@ data <- transform(data, date = as.Date(data$date, "%Y-%m-%d"))
 
 
 ```r
-## what period does the data cover?
+# what period does the data cover?
 fromDate <- format(min(data$date), "%a %b %d, %Y")
 toDate <- format(max(data$date), "%a %b %d, %Y")
 ```
 
-The following histogram shows the total number of steps taken each day during
-the two month period   
+Total the number of steps taken each day during the two month period  
 from **Mon Oct 01, 2012** to **Fri Nov 30, 2012**.  
 This excludes days for which no steps data was recorded.
 
-Aggregate the total number of steps per day:
 
 ```r
 dailyTotals <- aggregate(steps ~ date, data, FUN = sum)
 
-## calculate mean and median from daily totals
+# calculate mean and median from daily totals
 stepsMean <- prettyNum(mean(dailyTotals$steps), big.mark=",")
 stepsMedian <- prettyNum(median(dailyTotals$steps), big.mark=",")
 ```
@@ -104,13 +107,10 @@ stepsMedian <- prettyNum(median(dailyTotals$steps), big.mark=",")
 The mean number of steps was **10,766.19** per day.  
 The median number of steps was **10,765** per day. 
 
-Below is a plot showing the total number of steps per day as a histogram:
+Show a histogram of the frequency of total steps:
 
 
 ```r
-require(magrittr)
-require(ggplot2)
-require(scales)
 dailyTotals %>%
     ggplot(aes(steps)) + 
     geom_histogram(binwidth = 1000, fill = "purple", colour = "black", alpha = 0.7) +
@@ -131,20 +131,17 @@ Average the number of steps taken across all days:
 ```r
 intervalTotals <- aggregate(steps ~ interval, data, FUN = mean)
 
-## what was interval containing the maximum number of steps?
+# what was interval containing the maximum number of steps?
 maxStepsInterval <- intervalTotals[which.max(intervalTotals$steps), "interval"]
 ```
 
-The 5-minute interval which on average across all the days in the dataset
-contains the maximum number of steps is **835**. This peak is
-shown in the time series (line) plot of the 5-minute intervals and the number
-of steps taken averaged across all days:
+The 5-minute interval which on average across all the days in the dataset 
+contains the maximum number of steps is **835**. This peak is 
+shown in the time series (line) plot of the 5-minute intervals and the number of
+steps taken averaged across all days:
 
 
 ```r
-require(magrittr)
-require(ggplot2)
-require(scales)
 intervalTotals %>%
     ggplot(aes(interval, steps)) + 
     geom_line(colour = "purple") +
@@ -167,7 +164,6 @@ calculations or summaries of the data.
 
 
 ```r
-require(scales)
 ms <- sum(is.na(data$steps))
 ts <- length(data$steps)
 missingSteps <- prettyNum(ms, big.mark = ",")
@@ -178,14 +174,15 @@ percentSteps <- percent(ms/ts)
 There are **2,304** of **17,568** rows without step values,
 which is around **13.1%**.
 
-We will impute missing steps using the _median_ for that _weekdays_ 5-minute
-interval. That is modelling against similar activity by day of week. Firstly,
-calculate the median by weekday:
+We will impute missing steps using the _median_ for that _weekdays_ 5-minute 
+interval. That is, we are modelling against similar activity for that time 
+interval for that day of week. Here, we are making the assumption that activity
+for a day is much the same: one Monday looks like any other Monday. To do this
+we must first calculate the median by weekday and 5-minute time interval:
 
 
 ```r
-require(dplyr)
-## create key "dayint" used for matching against data, where day is a weekday
+# create key "dayint" used for matching against data, where day is a weekday
 intervalsByDay <- data %>%
     mutate(dayint = paste0(format(date, "%a"), formatC(interval, flag = "0", width = 4))) %>%
     select(dayint, steps) %>%
@@ -193,31 +190,31 @@ intervalsByDay <- data %>%
     summarise(median = as.integer(median(steps, na.rm = TRUE)))
 ```
 
-Impute the missing steps data using weekday/interval medians:
+Now we can merge the median by day as an additional column. Then it is easy to
+impute the missing steps using the median for that weekdays 5-minute interval:
 
 
 ```r
-require(dplyr)
-## create a key field to use for merging with intervalsByDay
+# create a key field to use for merging with intervalsByDay
+# merge via left join median for days interval into data frame (this adds a median column)
+# where steps is missing (NA) use the median of the weekday interval
+# select only required columns
 imputedData <- data %>%
     mutate(dayint = paste0(format(date, "%a"), formatC(interval, flag = "0", width = 4))) %>%
-    select(dayint, date, interval, steps)
-## merge median for days interval into data frame (this adds a median column)
-imputedData <- merge(imputedData, intervalsByDay, by = "dayint")
-## where steps is missing (NA) use the median of the weekday interval
-imputedData <- imputedData %>%
+    select(dayint, date, interval, steps) %>%
+    left_join(y = intervalsByDay, by = "dayint") %>%
     mutate(steps = ifelse(is.na(steps), median, steps)) %>%
     select(date, interval, steps)
 ```
 
 Further analysis will use these imputed results. Firstly, summarise the total
-number of steps taken per day, and show in a histogram:
+number of steps taken per day, and show the total step frequency in a histogram:
 
 
 ```r
 dailyImputedTotals <- aggregate(steps ~ date, imputedData, FUN = sum)
 
-## calculate mean and median from daily imputed totals
+# calculate mean and median from daily imputed totals
 stepsMean <- prettyNum(mean(dailyImputedTotals$steps), big.mark=",")
 stepsMedian <- prettyNum(median(dailyImputedTotals$steps), big.mark=",")
 ```
@@ -231,9 +228,6 @@ leaving the median step count unchanged.
 
 
 ```r
-require(magrittr)
-require(ggplot2)
-require(scales)
 dailyImputedTotals %>%
     ggplot(aes(steps)) + 
     geom_histogram(binwidth = 1000, fill = "purple", colour = "black", alpha = 0.7) +
@@ -252,10 +246,9 @@ Using imputed data compare weekday activity to weekends:
 
 
 ```r
-require(dplyr)
-## create a factor for weekday / weekend
-## format %u gives weekday as a decimal number (1–7, Monday is 1)
-## so weekdays are when %u = 1..5, weekends when %u = 6, 7
+# create a factor for weekday / weekend
+# format %u gives weekday as a decimal number (1–7, Monday is 1)
+# so weekdays are when %u = 1..5, weekends when %u = 6, 7
 imputedWeekDayData <- imputedData %>%
     mutate(weekday = factor(ifelse(format(date, "%u") < 6, "WeekDay", "WeekEnd"))) %>%
     select(weekday, interval, steps) %>%
@@ -267,9 +260,6 @@ The following time series plot shows the 5-minute interval by weekday/weekend:
 
 
 ```r
-require(magrittr)
-require(ggplot2)
-require(scales)
 imputedWeekDayData %>%
     ggplot(aes(x = interval, y = average)) + 
     geom_line(colour = "purple") +
