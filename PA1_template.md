@@ -45,7 +45,7 @@ Ensure that we show all our working and set global defaults:
 
 ```r
 require(knitr)
-opts_chunk$set(fig.path = "figure/", cache.path = 'cache/', echo = TRUE, cache = TRUE, fig.width = 10)
+opts_chunk$set(fig.path = "figure/", cache.path = "cache/", echo = TRUE, cache = TRUE, fig.width = 10)
 ```
 
 Load data into a data frame:
