@@ -20,10 +20,10 @@ to obtain and there is a lack of statistical methods and software for
 processing and interpreting the data.
 
 This assessment makes use of data from a personal activity monitoring device.
-This device collects data at 5 minute intervals through out the day. The data
+This device collects data at 5-minute intervals through out the day. The data
 consists of two months of data from an anonymous individual collected during
 the months of October and November, 2012 and include the number of steps taken
-in 5 minute intervals each day.
+in 5-minute intervals each day.
 
 ## Data
 
@@ -57,7 +57,7 @@ require(utils)
 require(ggplot2)
 require(scales)
 require(dplyr)
-opts_chunk$set(fig.path = "figure/", cache.path = "cache/", echo = TRUE, cache = TRUE, fig.width = 10)
+opts_chunk$set(echo = TRUE, cache = TRUE, cache.path = "cache/", fig.width = 10, fig.path = "figure/")
 ```
 
 Load data into a data frame:
@@ -269,11 +269,11 @@ imputedWeekDayData %>%
     labs(x = "Interval") +
     labs(y = "Steps (averaged)") +
     facet_grid(weekday ~ .) +
-    ggtitle("Time Series: averaged steps in 5 minute intervals by weekday/weekend")
+    ggtitle("Time Series: averaged steps in 5-minute intervals by weekday/weekend")
 ```
 
 ![plot of chunk timeseriesimputed](figure/timeseriesimputed-1.png) 
 
-The weekday step average is higher in the morning, possibly indicating that the
-individual was active earlier during a weekday. Also, on weekends, there
-appears to be more activity throughout the day.
+The average of steps by weekday is higher in the morning, possibly indicating
+that the individual was active earlier during a weekday. Also, on weekends,
+there appears to be more activity throughout the day.
