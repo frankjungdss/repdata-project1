@@ -1,4 +1,9 @@
-# Reproducible Research: Peer Assessment 1
+---
+title: 'Reproducible Research: Peer Assessment 1'
+output:
+  html_document:
+    keep_md: yes
+---
 
 ## Introduction
 
@@ -116,7 +121,7 @@ dailyTotals %>%
     ggtitle("Histogram: total steps per day")
 ```
 
-![](figure/histogram-1.png) 
+![plot of chunk histogram](figure/histogram-1.png) 
 
 ## What is the average daily activity pattern?
 
@@ -152,7 +157,7 @@ intervalTotals %>%
     ggtitle("Time Series: steps per 5-minute interval")
 ```
 
-![](figure/timeseries-1.png) 
+![plot of chunk timeseries](figure/timeseries-1.png) 
 
 ## Imputing missing values
 
@@ -239,7 +244,7 @@ dailyImputedTotals %>%
     ggtitle("Histogram: total imputed steps per day")
 ```
 
-![](figure/histogramimputed-1.png) 
+![plot of chunk histogramimputed](figure/histogramimputed-1.png) 
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -277,7 +282,7 @@ imputedWeekDayData %>%
     ggtitle("Time Series: averaged steps in 5 minute intervals by weekday/weekend")
 ```
 
-![](figure/timeseriesimputed-1.png) 
+![plot of chunk timeseriesimputed](figure/timeseriesimputed-1.png) 
 
 The weekday step average is higher in the morning, possibly indicating that the
 individual was active earlier during a weekday. Also, on weekends, there
