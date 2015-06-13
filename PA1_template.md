@@ -4,6 +4,10 @@ output:
   html_document:
     keep_md: yes
     toc: yes
+  pdf_document:
+    keep_tex: yes
+    latex_engine: xelatex
+    toc: yes
 ---
 
 # Reproducible Research: Peer Assessment 1
@@ -114,7 +118,7 @@ Show a histogram of the frequency of total steps:
 dailyTotals %>%
     ggplot(aes(steps)) + 
     geom_histogram(binwidth = 1000, fill = "purple", colour = "black", alpha = 0.7) +
-    theme_light(base_family = "Avenir", base_size = 11) +
+    theme_light(base_family = "sans", base_size = 11) +
     scale_y_continuous(breaks = pretty_breaks(10)) +
     labs(x = "Steps") +
     labs(y = "Frequency") +
@@ -145,7 +149,7 @@ steps taken averaged across all days:
 intervalTotals %>%
     ggplot(aes(interval, steps)) + 
     geom_line(colour = "purple") +
-    theme_light(base_family = "Avenir", base_size = 11) +
+    theme_light(base_family = "sans", base_size = 11) +
     scale_x_discrete(breaks = pretty_breaks(15)) +
     scale_y_continuous(breaks = pretty_breaks(10)) +
     labs(x = "Interval") +
@@ -231,7 +235,7 @@ leaving the median step count unchanged.
 dailyImputedTotals %>%
     ggplot(aes(steps)) + 
     geom_histogram(binwidth = 1000, fill = "purple", colour = "black", alpha = 0.7) +
-    theme_light(base_family = "Avenir", base_size = 11) +
+    theme_light(base_family = "sans", base_size = 11) +
     scale_y_continuous(breaks = pretty_breaks(10)) +
     labs(x = "Steps") +
     labs(y = "Frequency") +
@@ -263,7 +267,7 @@ The following time series plot shows the 5-minute interval by weekday/weekend:
 imputedWeekDayData %>%
     ggplot(aes(x = interval, y = average)) + 
     geom_line(colour = "purple") +
-    theme_light(base_family = "Avenir", base_size = 11) +
+    theme_light(base_family = "sans", base_size = 11) +
     scale_x_discrete(breaks = pretty_breaks(15)) +
     scale_y_continuous(breaks = pretty_breaks(10)) +
     labs(x = "Interval") +
