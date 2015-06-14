@@ -1,13 +1,14 @@
 activity.csv
 *cache
 *files
+PA1_template.pdf
+PA1_template.R
+PA1_template.tex
 project1*.*
 .RData
 README.html
+README.pdf
 README.txt
 .Rhistory
 .Rproj.user
 rsconnect/
-README.pdf
-PA1_template.pdf
-PA1_template.tex
