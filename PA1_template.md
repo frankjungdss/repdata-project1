@@ -61,7 +61,8 @@ require(utils)
 require(ggplot2)
 require(scales)
 require(dplyr)
-opts_chunk$set(echo = TRUE, cache = TRUE, cache.path = "cache/", fig.width = 10, fig.path = "figure/")
+opts_chunk$set(echo = TRUE, cache = TRUE, cache.path = "cache/",
+               fig.width = 10, fig.path = "figure/")
 ```
 
 Load data into a data frame:
