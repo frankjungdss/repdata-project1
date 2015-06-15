@@ -28,6 +28,14 @@ library(knitr)
 knit2html("PA1_template.Rmd")
 ```
 
+Print with table of contents:
+
+```r
+library(knitr)
+library(markdown)
+knit2html("PA1_template.Rmd",  options = c("toc", markdown::markdownHTMLOptions(TRUE)))
+```
+
 Environment
 -----------
 
