@@ -125,18 +125,9 @@ Average the number of steps taken across all days:
 
 ```r
 intervalTotals <- aggregate(steps ~ interval, data, FUN = mean)
-# convert integer to HH:MM POSIXlt object by 
-# using modulus 100 operations on integer value to get hours and minutes
-# converting to formatted string 
-# parsing as POSIX datetime
-intervalTotals <- transform(intervalTotals,
-                            interval =
-                                strptime(
-                                    sprintf("%0d:%0d",
-                                            intervalTotals$interval%/%100,
-                                            intervalTotals$interval%%100),
-                                    format = "%H:%M",
-                                    tz = "C"))
+# convert integer to HH:MM POSIXlt object by converting to formatted string 
+# then parsing as POSIX datetime
+intervalTotals <- transform(intervalTotals, interval = strptime(sprintf("%04d", interval), "%H%M", tz ="C"))
 
 # what was interval containing the maximum number of steps?
 maxStepsInterval <- format(intervalTotals[which.max(intervalTotals$steps), "interval"], "%H:%M")
@@ -153,7 +144,7 @@ intervalTotals %>%
     ggplot(aes(interval, steps)) +
     geom_line(colour = "purple") +
     theme_light(base_family = "sans", base_size = 11) +
-    scale_x_datetime(labels = date_format("%H:%M"), breaks = pretty_breaks(15)) +
+    scale_x_datetime(labels = date_format("%H:%M"), breaks = pretty_breaks(10)) +
     scale_y_continuous(breaks = pretty_breaks(10)) +
     labs(x = "Interval") +
     labs(y = "Steps") +
