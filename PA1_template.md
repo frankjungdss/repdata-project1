@@ -1,14 +1,4 @@
----
-title: 'Reproducible Research: Peer Assessment 1'
-output:
-  html_document:
-    keep_md: yes
-    toc: yes
-  pdf_document:
-    keep_tex: yes
-    latex_engine: xelatex
-    toc: yes
----
+# Reproducible Research: Peer Assessment 1
 
 # Reproducible Research: Peer Assessment 1
 
@@ -126,7 +116,7 @@ dailyTotals %>%
     ggtitle("Histogram: total steps per day")
 ```
 
-![plot of chunk histogram](figure/histogram-1.png) 
+![](figure/histogram-1.png) 
 
 ## What is the average daily activity pattern?
 
@@ -135,23 +125,35 @@ Average the number of steps taken across all days:
 
 ```r
 intervalTotals <- aggregate(steps ~ interval, data, FUN = mean)
+# convert integer to HH:MM POSIXlt object by 
+# using modulus 100 operations on integer value to get hours and minutes
+# converting to formatted string 
+# parsing as POSIX datetime
+intervalTotals <- transform(intervalTotals,
+                            interval =
+                                strptime(
+                                    sprintf("%0d:%0d",
+                                            intervalTotals$interval%/%100,
+                                            intervalTotals$interval%%100),
+                                    format = "%H:%M",
+                                    tz = "C"))
 
 # what was interval containing the maximum number of steps?
-maxStepsInterval <- intervalTotals[which.max(intervalTotals$steps), "interval"]
+maxStepsInterval <- format(intervalTotals[which.max(intervalTotals$steps), "interval"], "%H:%M")
 ```
 
 The 5-minute interval which on average across all the days in the dataset 
-contains the maximum number of steps is **835**. This peak is 
+contains the maximum number of steps is **08:35**. This peak is 
 shown in the time series (line) plot of the 5-minute intervals and the number of
 steps taken averaged across all days:
 
 
 ```r
 intervalTotals %>%
-    ggplot(aes(interval, steps)) + 
+    ggplot(aes(interval, steps)) +
     geom_line(colour = "purple") +
     theme_light(base_family = "sans", base_size = 11) +
-    scale_x_discrete(breaks = pretty_breaks(15)) +
+    scale_x_datetime(labels = date_format("%H:%M"), breaks = pretty_breaks(15)) +
     scale_y_continuous(breaks = pretty_breaks(10)) +
     labs(x = "Interval") +
     labs(y = "Steps") +
@@ -159,7 +161,7 @@ intervalTotals %>%
     ggtitle("Time Series: steps per 5-minute interval")
 ```
 
-![plot of chunk timeseries](figure/timeseries-1.png) 
+![](figure/timeseries-1.png) 
 
 ## Imputing missing values
 
@@ -243,7 +245,7 @@ dailyImputedTotals %>%
     ggtitle("Histogram: total imputed steps per day")
 ```
 
-![plot of chunk histogramimputed](figure/histogramimputed-1.png) 
+![](figure/histogramimputed-1.png) 
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -277,7 +279,7 @@ imputedWeekDayData %>%
     ggtitle("Time Series: averaged steps in 5-minute intervals by weekday/weekend")
 ```
 
-![plot of chunk timeseriesimputed](figure/timeseriesimputed-1.png) 
+![](figure/timeseriesimputed-1.png) 
 
 The average of steps by weekday is higher in the morning, possibly indicating
 that the individual was active earlier during a weekday. Also, on weekends,
