@@ -10,8 +10,6 @@ output:
     toc: yes
 ---
 
-# Reproducible Research: Peer Assessment 1
-
 ## Introduction
 
 It is now possible to collect a large amount of data about personal movement
@@ -243,6 +241,9 @@ imputedWeekDayData <- imputedData %>%
     select(weekday, interval, steps) %>%
     group_by(weekday, interval) %>%
     summarise(average = mean(steps))
+# convert interval to date for use in time-series plots
+imputedWeekDayData <- transform(imputedWeekDayData, 
+                                interval = strptime(sprintf("%04d", interval), "%H%M", tz ="C"))
 ```
 
 The following time series plot shows the 5-minute interval by weekday/weekend:
@@ -252,7 +253,7 @@ imputedWeekDayData %>%
     ggplot(aes(x = interval, y = average)) + 
     geom_line(colour = "purple") +
     theme_light(base_family = "sans", base_size = 11) +
-    scale_x_discrete(breaks = pretty_breaks(15)) +
+    scale_x_datetime(labels = date_format("%H:%M"), breaks = pretty_breaks(10)) +
     scale_y_continuous(breaks = pretty_breaks(10)) +
     labs(x = "Interval") +
     labs(y = "Steps (averaged)") +
